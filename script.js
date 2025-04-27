@@ -79,7 +79,7 @@ function formatMoney(input) {
     // Format the number with commas
     if (numericValue.length > 0) {
         const formattedValue = Number(numericValue).toLocaleString();
-        input.value = formattedValue;
+        input.value = formattedValue + ' 원';
     } else {
         input.value = '';
     }
@@ -420,10 +420,16 @@ function fillContractData() {
         formattedAgentPhone = `${agentPhonePrefix}-${agentPhone}`;
     }
     
+    // "원" 접미사 처리
+    // contractAmount에는 "원"이 없으므로 추가해줘야 함
+    // depositAmount에는 HTML에 이미 "원"이 있으므로 제거해야 함
+    const contractAmountWithoutWon = contractAmount.replace(/ 원$/, '');
+    const depositAmountWithoutWon = depositAmount.replace(/ 원$/, '');
+    
     // 상단 계약서 채우기
     document.getElementById('output_property1').textContent = propertyAddress;
     document.getElementById('output_contract_type1').textContent = contractType;
-    document.getElementById('output_amount1').textContent = contractAmount;
+    document.getElementById('output_amount1').textContent = contractAmountWithoutWon + ' 원';
     document.getElementById('output_contract_date1').textContent = formattedContractDate;
     
     // 부가조건과 계좌정보 분리
@@ -443,13 +449,14 @@ function fillContractData() {
     document.getElementById('output_reg_number1').textContent = regNumber;
     document.getElementById('output_agent_phone1').textContent = formattedAgentPhone;
     
-    document.getElementById('output_deposit_amount1').textContent = depositAmount;
+    // depositAmount는 HTML에 이미 "원"이 포함되어 있음
+    document.getElementById('output_deposit_amount1').textContent = depositAmountWithoutWon;
     document.getElementById('output_sign_date1').textContent = formattedSignDate;
     
     // 하단 계약서 채우기 (상단과 동일)
     document.getElementById('output_property2').textContent = propertyAddress;
     document.getElementById('output_contract_type2').textContent = contractType;
-    document.getElementById('output_amount2').textContent = contractAmount;
+    document.getElementById('output_amount2').textContent = contractAmountWithoutWon + ' 원';
     document.getElementById('output_contract_date2').textContent = formattedContractDate;
     
     // 부가조건과 계좌정보 분리
@@ -469,7 +476,7 @@ function fillContractData() {
     document.getElementById('output_reg_number2').textContent = regNumber;
     document.getElementById('output_agent_phone2').textContent = formattedAgentPhone;
     
-    document.getElementById('output_deposit_amount2').textContent = depositAmount;
+    document.getElementById('output_deposit_amount2').textContent = depositAmountWithoutWon;
     document.getElementById('output_sign_date2').textContent = formattedSignDate;
 }
 
@@ -492,7 +499,17 @@ function printContract() {
             document.getElementById('inputForm').style.display = 'block';
             document.getElementById('outputForm').style.display = 'none';
             
-            // 돌아가기 버튼 클릭시 사이드바 다시 표시하지 않도록 별도 처리
+            // 사이드바 다시 표시
+            sidePanels.forEach(panel => {
+                panel.style.display = 'block';
+            });
+            
+            // 메인 콘텐츠 원래 스타일로 복원
+            document.querySelector('.main-content').style.width = '';
+            
+            // 페이지가 로드될 때 프로필 목록 로드
+            loadAgentProfiles();
+            loadLandlordProfiles();
         }, 1000);
     }, 500);
 }
