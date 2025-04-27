@@ -7,16 +7,17 @@ body {
     padding: 0;
     font-family: 'Malgun Gothic', sans-serif;
     font-size: 12px;
-    background-color: #fff0f5; /* 밝은 핑크 배경색 */
+    background-color: var(--bg-color); /* 밝은 블루 배경색 */
 }
 
-/* 핑크 테마 색상 변수 */
+/* 색상 테마 변수 */
 :root {
-    --primary-pink: #ff69b4;
-    --secondary-pink: #ffb6c1;
-    --light-pink: #ffd1dc;
-    --dark-pink: #db7093;
-    --accent-pink: #ff1493;
+    --primary-color: #4a86e8;
+    --secondary-color: #9fc5e8;
+    --light-color: #cfe2f3;
+    --dark-color: #3d76c9;
+    --accent-color: #2a56a6;
+    --bg-color: #ecf4fd;
 }
 
 .page {
@@ -61,7 +62,7 @@ th, td {
 
 /* 입력 폼 테이블 스타일링 */
 #inputForm table td {
-    border: 1px solid var(--dark-pink);
+    border: 1px solid var(--dark-color);
 }
 
 td.no-right-border {
@@ -72,19 +73,20 @@ td.no-left-border {
 }
 .left-header {
     width: 100px;
-    background-color: var(--light-pink);
+    background-color: var(--dark-color);
     text-align: center;
     font-weight: bold;
-    color: #333;
+    color: white;
 }
 .sub-header {
     width: 80px;
-    background-color: var(--secondary-pink);
+    background-color: var(--secondary-color);
     text-align: center;
     color: #333;
 }
 .value-cell {
     min-height: 18px;
+    background-color: white;
 }
 
 /* 계약 조건 셀 높이 제한 */
@@ -147,28 +149,28 @@ td.no-left-border {
 }
 input, select, textarea {
     padding: 6px;
-    border: 1px solid var(--secondary-pink);
+    border: 1px solid var(--secondary-color);
     margin: 2px 0;
     border-radius: 4px;
 }
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--primary-pink);
-    box-shadow: 0 0 5px rgba(255, 105, 180, 0.3);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(100, 100, 100, 0.3);
 }
 input[type="text"], textarea {
     width: 100%;
     box-sizing: border-box;
 }
 input[type="date"] {
-    border-color: var(--secondary-pink);
+    border-color: var(--secondary-color);
 }
 .radio-container {
     display: flex;
     gap: 10px;
 }
 .radio-container input[type="radio"] {
-    accent-color: var(--primary-pink);
+    accent-color: var(--primary-color);
 }
 .button-container {
     display: flex;
@@ -178,7 +180,7 @@ input[type="date"] {
 }
 button {
     padding: 10px 20px;
-    background-color: var(--primary-pink);
+    background-color: var(--primary-color);
     color: white;
     border: none;
     cursor: pointer;
@@ -187,7 +189,7 @@ button {
     transition: all 0.3s ease;
 }
 button:hover {
-    background-color: var(--accent-pink);
+    background-color: var(--accent-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -222,7 +224,7 @@ button:hover {
     z-index: 2;
 }
 .header {
-    background: linear-gradient(to right, var(--primary-pink), var(--dark-pink));
+    background: linear-gradient(to right, var(--primary-color), var(--dark-color));
     color: white;
     padding: 15px 20px;
     margin-bottom: 20px;
@@ -275,6 +277,25 @@ h1, h2 {
         flex: 1;
     }
     
+    .left-header {
+        background-color: #e8e8e8 !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .sub-header {
+        background-color: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .value-cell {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
     .perforation-line {
         margin: 0;
     }
@@ -294,39 +315,50 @@ h1, h2 {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    justify-content: space-between;
 }
 .side-panel {
     width: 200px;
     background-color: white;
     padding: 15px;
     border-radius: 10px;
-    margin-right: 15px;
     max-height: 600px;
     overflow-y: auto;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--light-pink);
+    border: 1px solid var(--light-color);
+    flex-shrink: 0;
 }
+
+#agentPanel {
+    margin-right: 20px;
+}
+
+#landlordPanel {
+    margin-left: 20px;
+}
+
 .main-content {
     flex: 1;
+    max-width: calc(100% - 440px); /* 200px(왼쪽 패널) + 200px(오른쪽 패널) + 40px(마진) */
 }
 .list-item {
     padding: 10px;
     margin-bottom: 8px;
-    border: 1px solid var(--light-pink);
+    border: 1px solid var(--light-color);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
     background-color: white;
 }
 .list-item:hover {
-    background-color: var(--light-pink);
+    background-color: var(--light-color);
     transform: translateY(-2px);
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
 }
 .list-item.selected {
-    background-color: var(--secondary-pink);
-    border-color: var(--primary-pink);
-    box-shadow: 0 2px 4px rgba(255, 105, 180, 0.2);
+    background-color: var(--secondary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(100, 100, 100, 0.2);
     color: #333;
 }
 .panel-title {
@@ -334,8 +366,8 @@ h1, h2 {
     margin-bottom: 15px;
     text-align: center;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--light-pink);
-    color: var(--dark-pink);
+    border-bottom: 1px solid var(--light-color);
+    color: var(--dark-color);
     font-size: 1.1em;
 }
 .profile-action {
@@ -347,14 +379,14 @@ h1, h2 {
     padding: 6px 10px;
     font-size: 0.85rem;
     cursor: pointer;
-    background-color: var(--light-pink);
-    border: 1px solid var(--secondary-pink);
+    background-color: var(--light-color);
+    border: 1px solid var(--secondary-color);
     border-radius: 5px;
     color: #333;
     transition: all 0.2s;
 }
 .profile-btn:hover {
-    background-color: var(--secondary-pink);
+    background-color: var(--secondary-color);
     transform: translateY(-1px);
 }
 .list-item-empty {
