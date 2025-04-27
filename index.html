@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가계약서</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .phone-input {
+            display: flex;
+            align-items: center;
+        }
+        .phone-input select {
+            width: 70px;
+            margin-right: 5px;
+        }
+        .phone-input input {
+            flex: 1;
+        }
+        
+        /* 추가된 스타일 */
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        
+        .side-panel {
+            width: 200px;
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        .list-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .list-item:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .list-item.selected {
+            background-color: #ddeeff;
+            border-color: #99bbdd;
+        }
+        
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .profile-action {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .profile-btn {
+            padding: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-print">
+        <h1>가계약서 작성</h1>
+    </div>
+    
+    <div class="container no-print">
+        <!-- 왼쪽 사이드바: 중개사 목록 -->
+        <div class="side-panel" id="agentPanel">
+            <div class="panel-title">등록된 공인중개사</div>
+            <div id="agentList">
+                <!-- 중개사 목록이 여기에 추가됨 -->
+            </div>
+            <div class="profile-action">
+                <button class="profile-btn" onclick="saveAgentProfile()">프로필 저장</button>
+                <button class="profile-btn" onclick="deleteAgentProfile()">프로필 삭제</button>
+            </div>
+        </div>
+        
+        <!-- 중앙 콘텐츠: 메인 양식 -->
+        <div class="main-content">
+            <div id="inputForm">
+                <div>
+                    <label>양식종류:</label>
+                    <select>
+                        <option selected>가계약서</option>
+                    </select>
+                    
+                    <label style="margin-left: 20px;">양식(다운로드):</label>
+                    <select>
+                        <option selected>전속중개계약서</option>
+                    </select>
+                </div>
+                
+                <h2>가 계 약 서</h2>
+                
+                <div>
+                    <label for="propertyAddress">부동산의 표시:</label>
+                    <input type="text" id="propertyAddress" style="width: 100%;">
+                </div>
+                
+                <table style="width: 100%; margin-top: 10px;">
+                    <tr>
+                        <td rowspan="3" style="width: 100px; background-color: #f0f0f0; text-align: center; font-weight: bold;">계약조건</td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">구분</td>
+                        <td>
+                            <div class="radio-container">
+                                <input type="radio" name="contractType" id="sale" value="매매" checked> <label for="sale">매매</label>
+                                <input type="radio" name="contractType" id="lease" value="전세"> <label for="lease">전세</label>
+                                <input type="radio" name="contractType" id="rent" value="월세"> <label for="rent">월세</label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">계약금액</td>
+                        <td><input type="text" id="contractAmount" onblur="formatMoney(this)" value="￦"></td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">계약예정일</td>
+                        <td>
+                            <input type="date" id="contractDate" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">부가조건</td>
+                        <td colspan="2"><textarea id="additionalConditions" style="width: 100%; height: 60px;"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">계좌이체 정보</td>
+                        <td colspan="2">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div style="flex: 1;">
+                                    <label for="bankName" style="font-size: 0.9em; margin-right: 5px;">은행명:</label>
+                                    <input type="text" id="bankName" style="width: 80px;">
+                                </div>
+                                <div style="flex: 2;">
+                                    <label for="accountNumber" style="font-size: 0.9em; margin-right: 5px;">계좌번호:</label>
+                                    <input type="text" id="accountNumber">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label for="accountHolder" style="font-size: 0.9em; margin-right: 5px;">예금주:</label>
+                                    <input type="text" id="accountHolder">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table style="width: 100%; margin-top: 10px;">
+                    <tr>
+                        <td rowspan="2" style="width: 100px; background-color: #f0f0f0; text-align: center; font-weight: bold;">매도인/임대인</td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">성 명</td>
+                        <td><input type="text" id="sellerName"></td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">전화번호</td>
+                        <td>
+                            <div class="phone-input">
+                                <select id="sellerPhonePrefix">
+                                    <option value="010" selected>010</option>
+                                    <option value="011">011</option>
+                                    <option value="016">016</option>
+                                    <option value="017">017</option>
+                                    <option value="018">018</option>
+                                    <option value="019">019</option>
+                                    <option value="02">02</option>
+                                    <option value="031">031</option>
+                                    <option value="032">032</option>
+                                    <option value="033">033</option>
+                                    <option value="041">041</option>
+                                    <option value="042">042</option>
+                                    <option value="043">043</option>
+                                    <option value="044">044</option>
+                                    <option value="051">051</option>
+                                    <option value="052">052</option>
+                                    <option value="053">053</option>
+                                    <option value="054">054</option>
+                                    <option value="055">055</option>
+                                    <option value="061">061</option>
+                                    <option value="062">062</option>
+                                    <option value="063">063</option>
+                                    <option value="064">064</option>
+                                </select>
+                                <input type="text" id="sellerPhone" placeholder="나머지 번호" oninput="formatPhoneNumber(this)">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">주민등록번호</td>
+                        <td colspan="3"><input type="text" id="sellerId" placeholder="123456-1234567" maxlength="14" oninput="formatResidentId(this)"></td>
+                    </tr>
+                </table>
+                
+                <table style="width: 100%; margin-top: 10px;">
+                    <tr>
+                        <td rowspan="2" style="width: 100px; background-color: #f0f0f0; text-align: center; font-weight: bold;">매수인/임차인</td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">성 명</td>
+                        <td><input type="text" id="buyerName"></td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">전화번호</td>
+                        <td>
+                            <div class="phone-input">
+                                <select id="buyerPhonePrefix">
+                                    <option value="010" selected>010</option>
+                                    <option value="011">011</option>
+                                    <option value="016">016</option>
+                                    <option value="017">017</option>
+                                    <option value="018">018</option>
+                                    <option value="019">019</option>
+                                    <option value="02">02</option>
+                                    <option value="031">031</option>
+                                    <option value="032">032</option>
+                                    <option value="033">033</option>
+                                    <option value="041">041</option>
+                                    <option value="042">042</option>
+                                    <option value="043">043</option>
+                                    <option value="044">044</option>
+                                    <option value="051">051</option>
+                                    <option value="052">052</option>
+                                    <option value="053">053</option>
+                                    <option value="054">054</option>
+                                    <option value="055">055</option>
+                                    <option value="061">061</option>
+                                    <option value="062">062</option>
+                                    <option value="063">063</option>
+                                    <option value="064">064</option>
+                                </select>
+                                <input type="text" id="buyerPhone" placeholder="나머지 번호" oninput="formatPhoneNumber(this)">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">주민등록번호</td>
+                        <td colspan="3"><input type="text" id="buyerId" placeholder="123456-1234567" maxlength="14" oninput="formatResidentId(this)"></td>
+                    </tr>
+                </table>
+                
+                <table style="width: 100%; margin-top: 10px;">
+                    <tr>
+                        <td rowspan="3" style="width: 100px; background-color: #f0f0f0; text-align: center; font-weight: bold;">개업공인중개사</td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">성 명</td>
+                        <td colspan="3"><input type="text" id="agentName"></td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">사무소명칭</td>
+                        <td colspan="3"><input type="text" id="officeName"></td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8; text-align: center;">등 록 번 호</td>
+                        <td><input type="text" id="regNumber"></td>
+                        <td style="width: 80px; background-color: #f8f8f8; text-align: center;">전화번호</td>
+                        <td>
+                            <div class="phone-input">
+                                <select id="agentPhonePrefix">
+                                    <option value="010" selected>010</option>
+                                    <option value="011">011</option>
+                                    <option value="016">016</option>
+                                    <option value="017">017</option>
+                                    <option value="018">018</option>
+                                    <option value="019">019</option>
+                                    <option value="02">02</option>
+                                    <option value="031">031</option>
+                                    <option value="032">032</option>
+                                    <option value="033">033</option>
+                                    <option value="041">041</option>
+                                    <option value="042">042</option>
+                                    <option value="043">043</option>
+                                    <option value="044">044</option>
+                                    <option value="051">051</option>
+                                    <option value="052">052</option>
+                                    <option value="053">053</option>
+                                    <option value="054">054</option>
+                                    <option value="055">055</option>
+                                    <option value="061">061</option>
+                                    <option value="062">062</option>
+                                    <option value="063">063</option>
+                                    <option value="064">064</option>
+                                </select>
+                                <input type="text" id="agentPhone" placeholder="나머지 번호" oninput="formatPhoneNumber(this)">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                
+                <div style="margin: 20px 0; text-align: center;">
+                    상기와 같이 위 표시 부동산에 가계약을 하고 계약금 <input type="text" id="depositAmount" style="width: 150px;" onblur="formatMoney(this)" value="￦"> 원을 영수함.
+                </div>
+                
+                <div style="margin: 20px 0; text-align: center;">
+                    위 계약을 위반시는 매도인/임대인은 계약금의 배액을 배상하고, 매수인/임차인은 계약금을 포기하고 계약을 해제한다.
+                </div>
+                
+                <div style="margin: 20px 0; text-align: right;">
+                    작성일 : <input type="date" id="signDate" value="">
+                </div>
+                
+                <div class="button-container">
+                    <button onclick="createContract()">계약서 생성</button>
+                    <button onclick="printContract()">바로 인쇄하기</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 오른쪽 사이드바: 임대인 목록 -->
+        <div class="side-panel" id="landlordPanel">
+            <div class="panel-title">등록된 임대인</div>
+            <div id="landlordList">
+                <!-- 임대인 목록이 여기에 추가됨 -->
+            </div>
+            <div class="profile-action">
+                <button class="profile-btn" onclick="saveLandlordProfile()">프로필 저장</button>
+                <button class="profile-btn" onclick="deleteLandlordProfile()">프로필 삭제</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="outputForm">
+        <div class="page">
+            <!-- 상단 계약서 -->
+            <div id="topContract" class="contract-wrapper">
+                <div class="title">가 계 약 서</div>
+                
+                <table>
+                    <tr>
+                        <td class="left-header">부동산의 표시</td>
+                        <td id="output_property1" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="5">계약조건</td>
+                        <td class="sub-header">구분</td>
+                        <td id="output_contract_type1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">계약금액</td>
+                        <td id="output_amount1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">계약예정일</td>
+                        <td id="output_contract_date1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">부가조건</td>
+                        <td id="output_conditions1" class="value-cell" style="max-height: 60px; overflow-y: auto;"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">계좌정보</td>
+                        <td id="output_account_info1" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="2">매도인/임대인</td>
+                        <td class="sub-header">성 명</td>
+                        <td id="output_seller_name1" class="value-cell"></td>
+                        <td class="sub-header">전화번호</td>
+                        <td id="output_seller_phone1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">주민등록번호</td>
+                        <td colspan="3" id="output_seller_id1" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="2">매수인/임차인</td>
+                        <td class="sub-header">성 명</td>
+                        <td id="output_buyer_name1" class="value-cell"></td>
+                        <td class="sub-header">전화번호</td>
+                        <td id="output_buyer_phone1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">주민등록번호</td>
+                        <td colspan="3" id="output_buyer_id1" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="3">개업공인중개사</td>
+                        <td class="sub-header">성 명</td>
+                        <td colspan="3" id="output_agent_name1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">사무소명칭</td>
+                        <td colspan="3" id="output_office_name1" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">등 록 번 호</td>
+                        <td id="output_reg_number1" class="value-cell"></td>
+                        <td class="sub-header">전화번호</td>
+                        <td id="output_agent_phone1" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <div class="bottom-text">
+                    상기와 같이 위 표시 부동산에 가계약을 하고 계약금 <span id="output_deposit_amount1"></span> 원을 영수함.<br>
+                    위 계약을 위반시는 매도인/임대인은 계약금의 배액을 배상하고, 매수인/임차인은 계약금을 포기하고 계약을 해제한다.
+                </div>
+                
+                <div class="signature-date">
+                    작성일 : <span id="output_sign_date1"></span>
+                </div>
+            </div>
+            
+            <!-- 절취선 -->
+            <div class="perforation-line">
+                <span class="perforation-text">절 취 선 (間印)</span>
+            </div>
+            
+            <!-- 하단 계약서 (상단과 동일) -->
+            <div id="bottomContract" class="contract-wrapper">
+                <div class="title">가 계 약 서</div>
+                
+                <table>
+                    <tr>
+                        <td class="left-header">부동산의 표시</td>
+                        <td id="output_property2" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="5">계약조건</td>
+                        <td class="sub-header">구분</td>
+                        <td id="output_contract_type2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">계약금액</td>
+                        <td id="output_amount2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">계약예정일</td>
+                        <td id="output_contract_date2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">부가조건</td>
+                        <td id="output_conditions2" class="value-cell" style="max-height: 60px; overflow-y: auto;"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">계좌정보</td>
+                        <td id="output_account_info2" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="2">매도인/임대인</td>
+                        <td class="sub-header">성 명</td>
+                        <td id="output_seller_name2" class="value-cell"></td>
+                        <td class="sub-header">전화번호</td>
+                        <td id="output_seller_phone2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">주민등록번호</td>
+                        <td colspan="3" id="output_seller_id2" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="2">매수인/임차인</td>
+                        <td class="sub-header">성 명</td>
+                        <td id="output_buyer_name2" class="value-cell"></td>
+                        <td class="sub-header">전화번호</td>
+                        <td id="output_buyer_phone2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">주민등록번호</td>
+                        <td colspan="3" id="output_buyer_id2" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <table>
+                    <tr>
+                        <td class="left-header" rowspan="3">개업공인중개사</td>
+                        <td class="sub-header">성 명</td>
+                        <td colspan="3" id="output_agent_name2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">사무소명칭</td>
+                        <td colspan="3" id="output_office_name2" class="value-cell"></td>
+                    </tr>
+                    <tr>
+                        <td class="sub-header">등 록 번 호</td>
+                        <td id="output_reg_number2" class="value-cell"></td>
+                        <td class="sub-header">전화번호</td>
+                        <td id="output_agent_phone2" class="value-cell"></td>
+                    </tr>
+                </table>
+                
+                <div class="bottom-text">
+                    상기와 같이 위 표시 부동산에 가계약을 하고 계약금 <span id="output_deposit_amount2"></span> 원을 영수함.<br>
+                    위 계약을 위반시는 매도인/임대인은 계약금의 배액을 배상하고, 매수인/임차인은 계약금을 포기하고 계약을 해제한다.
+                </div>
+                
+                <div class="signature-date">
+                    작성일 : <span id="output_sign_date2"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-container no-print">
+            <button onclick="goBack()">돌아가기</button>
+            <button onclick="window.print()">인쇄하기</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // 오늘 날짜를 기본값으로 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayString = `${year}-${month}-${day}`;
+            
+            document.getElementById('contractDate').value = todayString;
+            document.getElementById('signDate').value = todayString;
+            
+            // 저장된 프로필 로드
+            loadAgentProfiles();
+            loadLandlordProfiles();
+        });
+    </script>
+</body>
+</html> 

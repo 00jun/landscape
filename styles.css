@@ -1,0 +1,376 @@
+@page {
+    size: A4;
+    margin: 0;
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Malgun Gothic', sans-serif;
+    font-size: 12px;
+    background-color: #fff0f5; /* 밝은 핑크 배경색 */
+}
+
+/* 핑크 테마 색상 변수 */
+:root {
+    --primary-pink: #ff69b4;
+    --secondary-pink: #ffb6c1;
+    --light-pink: #ffd1dc;
+    --dark-pink: #db7093;
+    --accent-pink: #ff1493;
+}
+
+.page {
+    width: 210mm;
+    height: 297mm;
+    padding: 5mm;
+    box-sizing: border-box;
+    background-color: white;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    transform: scale(0.9);
+    transform-origin: top center;
+    display: flex;
+    flex-direction: column;
+}
+.title {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+}
+
+/* 출력 모드에서 테이블 간격 제거 */
+#outputForm table {
+    margin-bottom: 0;
+}
+
+#outputForm table + table {
+    margin-top: -1px; /* 테이블 사이의 경계선 중복 방지 */
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 6px;
+}
+
+/* 입력 폼 테이블 스타일링 */
+#inputForm table td {
+    border: 1px solid var(--dark-pink);
+}
+
+td.no-right-border {
+    border-right: none;
+}
+td.no-left-border {
+    border-left: none;
+}
+.left-header {
+    width: 100px;
+    background-color: var(--light-pink);
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+}
+.sub-header {
+    width: 80px;
+    background-color: var(--secondary-pink);
+    text-align: center;
+    color: #333;
+}
+.value-cell {
+    min-height: 18px;
+}
+
+/* 계약 조건 셀 높이 제한 */
+#output_conditions1, #output_conditions2 {
+    max-height: 50px;
+    overflow-y: auto;
+    font-size: 0.95em;
+}
+
+#output_account_info1, #output_account_info2 {
+    font-size: 0.95em;
+}
+
+/* 출력 모드에서 바닥글 간격 줄이기 */
+#outputForm .bottom-text {
+    margin: 10px 0;
+}
+
+#outputForm .signature-date {
+    margin: 10px 0;
+}
+
+/* 출력 모드에서 절취선 간격 줄이기 */
+#outputForm .perforation-line {
+    margin: 10px 0;
+}
+
+.seal {
+    font-weight: bold;
+    display: inline-block;
+}
+.seal-area {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+.bottom-text {
+    margin: 15px 0;
+    text-align: center;
+}
+.signature-date {
+    margin: 15px 0;
+    text-align: center;
+}
+/* 입력 폼 스타일 */
+#inputForm, #outputForm {
+    background-color: white;
+    padding: 20px;
+    margin: 0 auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+#outputForm {
+    display: none;
+    max-width: 800px;
+}
+input, select, textarea {
+    padding: 6px;
+    border: 1px solid var(--secondary-pink);
+    margin: 2px 0;
+    border-radius: 4px;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-pink);
+    box-shadow: 0 0 5px rgba(255, 105, 180, 0.3);
+}
+input[type="text"], textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+input[type="date"] {
+    border-color: var(--secondary-pink);
+}
+.radio-container {
+    display: flex;
+    gap: 10px;
+}
+.radio-container input[type="radio"] {
+    accent-color: var(--primary-pink);
+}
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+button {
+    padding: 10px 20px;
+    background-color: var(--primary-pink);
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+button:hover {
+    background-color: var(--accent-pink);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.perforation-line {
+    margin: 0;
+    position: relative;
+    text-align: center;
+    width: 100%;
+    height: 1px;
+    background: none;
+}
+
+.perforation-line:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed #999;
+    z-index: 1;
+}
+
+.perforation-text {
+    position: relative;
+    background: white;
+    padding: 0 10px;
+    font-size: 0.8em;
+    color: #777;
+    display: inline-block;
+    position: relative;
+    top: -0.5em;
+    z-index: 2;
+}
+.header {
+    background: linear-gradient(to right, var(--primary-pink), var(--dark-pink));
+    color: white;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+h1, h2 {
+    margin: 0;
+    padding: 10px 0;
+}
+.contract-wrapper {
+    border: 1px solid transparent;
+    padding: 8px;
+    margin-bottom: 5px;
+}
+#topContract, #bottomContract {
+    flex: 1;
+    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+}
+/* 전화번호 텍스트 스타일 */
+.phone-text {
+    width: 100%;
+}
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background-color: white;
+    }
+    #outputForm {
+        box-shadow: none;
+        padding: 0;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+    .page {
+        height: 297mm;
+        display: flex;
+        flex-direction: column;
+        transform: scale(1);
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+    
+    #topContract, #bottomContract {
+        flex: 1;
+    }
+    
+    .perforation-line {
+        margin: 0;
+    }
+    .side-panel {
+        display: none !important;
+    }
+    .container {
+        display: block;
+    }
+    .main-content {
+        width: 100%;
+    }
+}
+/* 사이드바 스타일 */
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.side-panel {
+    width: 200px;
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-right: 15px;
+    max-height: 600px;
+    overflow-y: auto;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--light-pink);
+}
+.main-content {
+    flex: 1;
+}
+.list-item {
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--light-pink);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+}
+.list-item:hover {
+    background-color: var(--light-pink);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+}
+.list-item.selected {
+    background-color: var(--secondary-pink);
+    border-color: var(--primary-pink);
+    box-shadow: 0 2px 4px rgba(255, 105, 180, 0.2);
+    color: #333;
+}
+.panel-title {
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--light-pink);
+    color: var(--dark-pink);
+    font-size: 1.1em;
+}
+.profile-action {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+.profile-btn {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background-color: var(--light-pink);
+    border: 1px solid var(--secondary-pink);
+    border-radius: 5px;
+    color: #333;
+    transition: all 0.2s;
+}
+.profile-btn:hover {
+    background-color: var(--secondary-pink);
+    transform: translateY(-1px);
+}
+.list-item-empty {
+    color: #888;
+    text-align: center;
+    padding: 15px 0;
+    font-style: italic;
+}
+
+/* 출력 모드에서 여백 조정 */
+#outputForm .contract-wrapper {
+    padding: 8px;
+    margin-bottom: 5px;
+    border: none;
+}
+
+#outputForm .title {
+    margin-bottom: 10px;
+} 
