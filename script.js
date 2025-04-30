@@ -85,8 +85,85 @@ function formatMoney(input) {
     }
 }
 
+// 암호화/복호화를 위한 유틸리티 함수들
+async function generateKey() {
+    // 브라우저의 보안 컨텍스트를 기반으로 키 생성
+    const keyMaterial = await window.crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(window.location.hostname),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveBits', 'deriveKey']
+    );
+    return keyMaterial;
+}
+
+async function deriveKey(salt) {
+    const keyMaterial = await generateKey();
+    return window.crypto.subtle.deriveKey(
+        {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: 100000,
+            hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+    );
+}
+
+async function encryptData(data) {
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(salt);
+    
+    const encryptedContent = await window.crypto.subtle.encrypt(
+        {
+            name: 'AES-GCM',
+            iv: iv
+        },
+        key,
+        new TextEncoder().encode(JSON.stringify(data))
+    );
+    
+    const encryptedData = {
+        salt: Array.from(salt),
+        iv: Array.from(iv),
+        content: Array.from(new Uint8Array(encryptedContent))
+    };
+    
+    return btoa(JSON.stringify(encryptedData));
+}
+
+async function decryptData(encryptedData) {
+    try {
+        const encryptedObj = JSON.parse(atob(encryptedData));
+        const salt = new Uint8Array(encryptedObj.salt);
+        const iv = new Uint8Array(encryptedObj.iv);
+        const content = new Uint8Array(encryptedObj.content);
+        
+        const key = await deriveKey(salt);
+        
+        const decryptedContent = await window.crypto.subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
+            },
+            key,
+            content
+        );
+        
+        return JSON.parse(new TextDecoder().decode(decryptedContent));
+    } catch (error) {
+        console.error('Decryption failed:', error);
+        return null;
+    }
+}
+
 // 중개사 프로필 관련 함수
-function saveAgentProfile() {
+async function saveAgentProfile() {
     const agentName = document.getElementById('agentName').value.trim();
     if (!agentName) {
         alert('중개사 이름을 입력해주세요.');
@@ -107,27 +184,35 @@ function saveAgentProfile() {
         phone: agentPhone
     };
     
-    // 로컬 스토리지에서 기존 프로필 불러오기
-    let agentProfiles = JSON.parse(localStorage.getItem('agentProfiles')) || [];
-    
-    // 동일한 이름의 프로필이 있으면 업데이트, 없으면 추가
-    const existingIndex = agentProfiles.findIndex(p => p.name === agentName);
-    if (existingIndex >= 0) {
-        agentProfiles[existingIndex] = profile;
-    } else {
-        agentProfiles.push(profile);
+    try {
+        // 프로필 암호화
+        const encryptedProfile = await encryptData(profile);
+        
+        // 로컬 스토리지에서 기존 프로필 불러오기
+        let agentProfiles = JSON.parse(localStorage.getItem('agentProfiles')) || [];
+        
+        // 동일한 이름의 프로필이 있으면 업데이트, 없으면 추가
+        const existingIndex = agentProfiles.findIndex(p => p.name === agentName);
+        if (existingIndex >= 0) {
+            agentProfiles[existingIndex] = { name: agentName, encryptedData: encryptedProfile };
+        } else {
+            agentProfiles.push({ name: agentName, encryptedData: encryptedProfile });
+        }
+        
+        // 로컬 스토리지에 저장
+        localStorage.setItem('agentProfiles', JSON.stringify(agentProfiles));
+        
+        // 프로필 목록 다시 로드
+        loadAgentProfiles();
+        
+        alert('중개사 프로필이 저장되었습니다.');
+    } catch (error) {
+        console.error('Encryption failed:', error);
+        alert('프로필 저장 중 오류가 발생했습니다.');
     }
-    
-    // 로컬 스토리지에 저장
-    localStorage.setItem('agentProfiles', JSON.stringify(agentProfiles));
-    
-    // 프로필 목록 다시 로드
-    loadAgentProfiles();
-    
-    alert('중개사 프로필이 저장되었습니다.');
 }
 
-function loadAgentProfiles() {
+async function loadAgentProfiles() {
     const agentList = document.getElementById('agentList');
     agentList.innerHTML = ''; // 기존 목록 비우기
     
@@ -140,14 +225,14 @@ function loadAgentProfiles() {
     }
     
     // 프로필 목록 생성
-    agentProfiles.forEach(profile => {
+    agentProfiles.forEach(async profile => {
         const profileDiv = document.createElement('div');
         profileDiv.className = 'list-item';
         profileDiv.setAttribute('data-name', profile.name);
         profileDiv.textContent = `${profile.name} (${profile.officeName || '사무소명 없음'})`;
         
         // 프로필 선택 이벤트
-        profileDiv.addEventListener('click', function() {
+        profileDiv.addEventListener('click', async function() {
             // 이전에 선택된 항목의 선택 상태 제거
             document.querySelectorAll('#agentList .list-item.selected').forEach(item => {
                 item.classList.remove('selected');
@@ -156,8 +241,17 @@ function loadAgentProfiles() {
             // 선택된 항목에 선택 상태 표시
             this.classList.add('selected');
             
-            // 선택된 프로필 정보로 폼 채우기
-            fillAgentForm(profile);
+            try {
+                const decryptedProfile = await decryptData(profile.encryptedData);
+                if (decryptedProfile) {
+                    fillAgentForm(decryptedProfile);
+                } else {
+                    alert('프로필 로드에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Decryption failed:', error);
+                alert('프로필 로드 중 오류가 발생했습니다.');
+            }
         });
         
         agentList.appendChild(profileDiv);
@@ -204,7 +298,7 @@ function deleteAgentProfile() {
 }
 
 // 임대인 프로필 관련 함수
-function saveLandlordProfile() {
+async function saveLandlordProfile() {
     const sellerName = document.getElementById('sellerName').value.trim();
     if (!sellerName) {
         alert('임대인 이름을 입력해주세요.');
@@ -226,33 +320,40 @@ function saveLandlordProfile() {
         id: sellerId,
         phonePrefix: sellerPhonePrefix,
         phone: sellerPhone,
-        // 계좌이체 정보 추가
         bankName: bankName,
         accountNumber: accountNumber,
         accountHolder: accountHolder
     };
     
-    // 로컬 스토리지에서 기존 프로필 불러오기
-    let landlordProfiles = JSON.parse(localStorage.getItem('landlordProfiles')) || [];
-    
-    // 동일한 이름의 프로필이 있으면 업데이트, 없으면 추가
-    const existingIndex = landlordProfiles.findIndex(p => p.name === sellerName);
-    if (existingIndex >= 0) {
-        landlordProfiles[existingIndex] = profile;
-    } else {
-        landlordProfiles.push(profile);
+    try {
+        // 프로필 암호화
+        const encryptedProfile = await encryptData(profile);
+        
+        // 로컬 스토리지에서 기존 프로필 불러오기
+        let landlordProfiles = JSON.parse(localStorage.getItem('landlordProfiles')) || [];
+        
+        // 동일한 이름의 프로필이 있으면 업데이트, 없으면 추가
+        const existingIndex = landlordProfiles.findIndex(p => p.name === sellerName);
+        if (existingIndex >= 0) {
+            landlordProfiles[existingIndex] = { name: sellerName, encryptedData: encryptedProfile };
+        } else {
+            landlordProfiles.push({ name: sellerName, encryptedData: encryptedProfile });
+        }
+        
+        // 로컬 스토리지에 저장
+        localStorage.setItem('landlordProfiles', JSON.stringify(landlordProfiles));
+        
+        // 프로필 목록 다시 로드
+        loadLandlordProfiles();
+        
+        alert('임대인 프로필이 저장되었습니다.');
+    } catch (error) {
+        console.error('Encryption failed:', error);
+        alert('프로필 저장 중 오류가 발생했습니다.');
     }
-    
-    // 로컬 스토리지에 저장
-    localStorage.setItem('landlordProfiles', JSON.stringify(landlordProfiles));
-    
-    // 프로필 목록 다시 로드
-    loadLandlordProfiles();
-    
-    alert('임대인 프로필이 저장되었습니다.');
 }
 
-function loadLandlordProfiles() {
+async function loadLandlordProfiles() {
     const landlordList = document.getElementById('landlordList');
     landlordList.innerHTML = ''; // 기존 목록 비우기
     
@@ -265,14 +366,14 @@ function loadLandlordProfiles() {
     }
     
     // 프로필 목록 생성
-    landlordProfiles.forEach(profile => {
+    landlordProfiles.forEach(async profile => {
         const profileDiv = document.createElement('div');
         profileDiv.className = 'list-item';
         profileDiv.setAttribute('data-name', profile.name);
         profileDiv.textContent = profile.name;
         
         // 프로필 선택 이벤트
-        profileDiv.addEventListener('click', function() {
+        profileDiv.addEventListener('click', async function() {
             // 이전에 선택된 항목의 선택 상태 제거
             document.querySelectorAll('#landlordList .list-item.selected').forEach(item => {
                 item.classList.remove('selected');
@@ -281,8 +382,17 @@ function loadLandlordProfiles() {
             // 선택된 항목에 선택 상태 표시
             this.classList.add('selected');
             
-            // 선택된 프로필 정보로 폼 채우기
-            fillLandlordForm(profile);
+            try {
+                const decryptedProfile = await decryptData(profile.encryptedData);
+                if (decryptedProfile) {
+                    fillLandlordForm(decryptedProfile);
+                } else {
+                    alert('프로필 로드에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Decryption failed:', error);
+                alert('프로필 로드 중 오류가 발생했습니다.');
+            }
         });
         
         landlordList.appendChild(profileDiv);
