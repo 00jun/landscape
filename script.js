@@ -225,37 +225,38 @@ async function loadAgentProfiles() {
     }
     
     // 프로필 목록 생성
-    agentProfiles.forEach(async profile => {
-        const profileDiv = document.createElement('div');
-        profileDiv.className = 'list-item';
-        profileDiv.setAttribute('data-name', profile.name);
-        profileDiv.textContent = `${profile.name} (${profile.officeName || '사무소명 없음'})`;
-        
-        // 프로필 선택 이벤트
-        profileDiv.addEventListener('click', async function() {
-            // 이전에 선택된 항목의 선택 상태 제거
-            document.querySelectorAll('#agentList .list-item.selected').forEach(item => {
-                item.classList.remove('selected');
-            });
+    for (const profile of agentProfiles) {
+        try {
+            const decryptedProfile = await decryptData(profile.encryptedData);
+            const profileDiv = document.createElement('div');
+            profileDiv.className = 'list-item';
+            profileDiv.setAttribute('data-name', profile.name);
+            profileDiv.textContent = `${decryptedProfile.name} (${decryptedProfile.officeName || '사무소명 없음'})`;
             
-            // 선택된 항목에 선택 상태 표시
-            this.classList.add('selected');
-            
-            try {
-                const decryptedProfile = await decryptData(profile.encryptedData);
+            // 프로필 선택 이벤트
+            profileDiv.addEventListener('click', async function() {
+                // 이전에 선택된 항목의 선택 상태 제거
+                document.querySelectorAll('#agentList .list-item.selected').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // 선택된 항목에 선택 상태 표시
+                this.classList.add('selected');
+                
                 if (decryptedProfile) {
                     fillAgentForm(decryptedProfile);
                 } else {
                     alert('프로필 로드에 실패했습니다.');
                 }
-            } catch (error) {
-                console.error('Decryption failed:', error);
-                alert('프로필 로드 중 오류가 발생했습니다.');
-            }
-        });
-        
-        agentList.appendChild(profileDiv);
-    });
+            });
+            
+            agentList.appendChild(profileDiv);
+        } catch (error) {
+            console.error('Decryption failed:', error);
+            // 개별 프로필 복호화 실패 시 해당 프로필만 스킵
+            continue;
+        }
+    }
 }
 
 function fillAgentForm(profile) {
