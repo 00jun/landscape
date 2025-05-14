@@ -309,10 +309,8 @@ async function saveLandlordProfile() {
     const sellerPhonePrefix = document.getElementById('sellerPhonePrefix').value;
     const sellerPhone = document.getElementById('sellerPhone').value.trim();
     
-    // 계좌이체 정보 추가
-    const bankName = document.getElementById('bankName').value.trim();
-    const accountNumber = document.getElementById('accountNumber').value.trim();
-    const accountHolder = document.getElementById('accountHolder').value.trim();
+    // 계좌이체 정보
+    const accountInfo = document.getElementById('accountInfo').value;
     
     // 프로필 객체 생성
     const profile = {
@@ -320,9 +318,7 @@ async function saveLandlordProfile() {
         id: sellerId,
         phonePrefix: sellerPhonePrefix,
         phone: sellerPhone,
-        bankName: bankName,
-        accountNumber: accountNumber,
-        accountHolder: accountHolder
+        accountInfo: accountInfo
     };
     
     try {
@@ -411,9 +407,7 @@ function fillLandlordForm(profile) {
     document.getElementById('sellerPhone').value = profile.phone || '';
     
     // 계좌이체 정보 채우기
-    document.getElementById('bankName').value = profile.bankName || '';
-    document.getElementById('accountNumber').value = profile.accountNumber || '';
-    document.getElementById('accountHolder').value = profile.accountHolder || '';
+    document.getElementById('accountInfo').value = profile.accountInfo || '';
 }
 
 function deleteLandlordProfile() {
@@ -471,15 +465,10 @@ function fillContractData() {
     const additionalConditions = document.getElementById('additionalConditions').value;
     
     // 계좌이체 정보
-    const bankName = document.getElementById('bankName').value;
-    const accountNumber = document.getElementById('accountNumber').value;
-    const accountHolder = document.getElementById('accountHolder').value;
+    const accountInfo = document.getElementById('accountInfo').value;
     
     // 계좌이체 정보 텍스트 구성
-    let accountInfo = '';
-    if (bankName || accountNumber || accountHolder) {
-        accountInfo = `${bankName} ${accountNumber} (예금주: ${accountHolder})`;
-    }
+    let accountInfoText = accountInfo.trim();
     
     // 계약금
     const depositAmount = document.getElementById('depositAmount').value;
@@ -503,7 +492,7 @@ function fillContractData() {
     const sellerName = document.getElementById('sellerName').value;
     const sellerId = document.getElementById('sellerId').value;
     const sellerPhonePrefix = document.getElementById('sellerPhonePrefix').value;
-    const sellerPhone = document.getElementById('sellerPhone').value.trim();
+    const sellerPhone = document.getElementById("sellerPhone").value.trim();
     let formattedSellerPhone = '';
     if (sellerPhone) {
         formattedSellerPhone = `${sellerPhonePrefix}-${sellerPhone}`;
@@ -544,7 +533,7 @@ function fillContractData() {
     
     // 부가조건과 계좌정보 분리
     document.getElementById('output_conditions1').innerHTML = additionalConditions.replace(/\n/g, '<br>');
-    document.getElementById('output_account_info1').textContent = accountInfo;
+    document.getElementById('output_account_info1').textContent = accountInfoText;
     
     document.getElementById('output_seller_name1').innerHTML = `${sellerName} (印)`;
     document.getElementById('output_seller_phone1').textContent = formattedSellerPhone;
@@ -571,7 +560,7 @@ function fillContractData() {
     
     // 부가조건과 계좌정보 분리
     document.getElementById('output_conditions2').innerHTML = additionalConditions.replace(/\n/g, '<br>');
-    document.getElementById('output_account_info2').textContent = accountInfo;
+    document.getElementById('output_account_info2').textContent = accountInfoText;
     
     document.getElementById('output_seller_name2').innerHTML = `${sellerName} (印)`;
     document.getElementById('output_seller_phone2').textContent = formattedSellerPhone;
